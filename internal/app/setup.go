@@ -7,8 +7,11 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+
+	"github.com/julioshinoda/transfer-api/internal/app/account"
 )
 
+//Setup function that start server with all setups
 func Setup() {
 	addr := fmt.Sprintf(":%s", os.Getenv("PORT"))
 	fmt.Printf("Starting server on %v\n", addr)
@@ -24,9 +27,7 @@ func router() http.Handler {
 	r.Use(middleware.Recoverer)
 
 	r.Group(func(r chi.Router) {
-		r.Get("/accounts", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("return accounts lists"))
-		})
+		r.Get("/accounts", account.GetAccounts)
 
 	})
 	return r
