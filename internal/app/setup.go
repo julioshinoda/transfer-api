@@ -24,10 +24,10 @@ func router() http.Handler {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-
 	r.Group(func(r chi.Router) {
 		r.Get("/accounts", account.GetAccounts)
 		r.Get("/accounts/{account_id}/balance", account.GetBallance)
+		r.Post("/accounts", account.CreateAccount)
 
 	})
 	return r

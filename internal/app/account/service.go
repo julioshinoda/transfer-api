@@ -1,6 +1,7 @@
 package account
 
 import (
+	"errors"
 	"time"
 
 	"github.com/julioshinoda/transfer-api/models"
@@ -10,7 +11,8 @@ import (
 //Accounter interface that contains account methods
 type Accounter interface {
 	GetAccounts() []models.Accounts
-	GetBallanceByAccountsID(accountID int64) (float64, error)
+	GetBallanceByAccountsID(accountID int64) (int, error)
+	CreateAccount(account models.Accounts) error
 }
 
 //Service struct that implements Accounter interface
@@ -52,7 +54,7 @@ func (a Service) GetAccounts() []models.Accounts {
 }
 
 //GetBallanceByAccountsID returns ballance from an account by a given account ID
-func (a Service) GetBallanceByAccountsID(accountID int64) (float64, error) {
+func (a Service) GetBallanceByAccountsID(accountID int64) (int, error) {
 	query := "select  ballance from accounts where id = $1"
 	result, err := a.DB.QueryExecutor(database.QueryConfig{QueryStr: query,
 		Values: []interface{}{accountID}})
@@ -63,9 +65,24 @@ func (a Service) GetBallanceByAccountsID(accountID int64) (float64, error) {
 
 	if len(result) > 0 {
 		account := result[0]
-		return float64(account.([]interface{})[0].(int32)) / 100, nil
+		return int(account.([]interface{})[0].(int32)), nil
 	}
 
 	return 0, nil
 
+}
+
+func (a Service) CreateAccount(account models.Accounts) error {
+	query := `INSERT INTO accounts( "name", cpf, ballance, created_at) VALUES($1, $2, $3, $4) RETURNING id;`
+	result, err := a.DB.QueryExecutor(database.QueryConfig{QueryStr: query,
+		Values: []interface{}{account.Name, account.CPF, account.Ballance, time.Now().Format("2006-01-02")}})
+
+	if err != nil {
+		return err
+	}
+	if len(result) == 0 {
+		return errors.New("account already created")
+	}
+
+	return nil
 }

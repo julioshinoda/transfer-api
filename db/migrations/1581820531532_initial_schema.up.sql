@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS accounts (
 	cpf varchar NULL,
 	ballance int4 NULL,
 	created_at date NULL,
-	CONSTRAINT accounts_pk PRIMARY KEY (id)
+	CONSTRAINT accounts_pk PRIMARY KEY (id),
+	CONSTRAINT accounts_un UNIQUE (cpf)
 );
 
 CREATE SEQUENCE IF NOT EXISTS transfers_id_seq

@@ -89,7 +89,7 @@ func TestService_GetBallanceByAccountsID(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    float64
+		want    int
 		wantErr bool
 	}{
 		{
@@ -100,7 +100,7 @@ func TestService_GetBallanceByAccountsID(t *testing.T) {
 			args: args{
 				accountID: int64(1),
 			},
-			want: float64(120.25),
+			want: int(12025),
 		},
 		{
 			name: "error to get ballance",
@@ -110,7 +110,7 @@ func TestService_GetBallanceByAccountsID(t *testing.T) {
 			args: args{
 				accountID: int64(1),
 			},
-			want:    float64(0),
+			want:    int(0),
 			wantErr: true,
 		},
 		{
@@ -121,7 +121,7 @@ func TestService_GetBallanceByAccountsID(t *testing.T) {
 			args: args{
 				accountID: int64(1),
 			},
-			want:    float64(0),
+			want:    int(0),
 			wantErr: false,
 		},
 	}
@@ -151,6 +151,65 @@ func TestService_GetBallanceByAccountsID(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("Service.GetBallanceByAccountsID() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestService_CreateAccount(t *testing.T) {
+	type fields struct {
+		DB database.SQLInterface
+	}
+	type args struct {
+		account models.Accounts
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "success to create account",
+			fields:  fields{DB: &mocks.SQLInterface{}},
+			args:    args{account: models.Accounts{Name: "test account", CPF: "12312312345", Ballance: 150000}},
+			wantErr: false,
+		},
+		{
+			name:    "error on create account",
+			fields:  fields{DB: &mocks.SQLInterface{}},
+			args:    args{account: models.Accounts{Name: "test account", CPF: "12312312345", Ballance: 150000}},
+			wantErr: true,
+		},
+		{
+			name:    "error for duplicated CPF",
+			fields:  fields{DB: &mocks.SQLInterface{}},
+			args:    args{account: models.Accounts{Name: "test account", CPF: "12312312345", Ballance: 150000}},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a := Service{
+				DB: tt.fields.DB,
+			}
+			switch tt.name {
+			case "success to create account":
+				a.DB.(*mocks.SQLInterface).On("QueryExecutor", mock.MatchedBy(func(conn database.QueryConfig) bool {
+					return conn.QueryStr == `INSERT INTO accounts( "name", cpf, ballance, created_at) VALUES($1, $2, $3, $4) RETURNING id;`
+				})).Return([]interface{}{[]interface{}{int32(0)}}, nil)
+			case "error on create account":
+				a.DB.(*mocks.SQLInterface).On("QueryExecutor", mock.MatchedBy(func(conn database.QueryConfig) bool {
+					return conn.QueryStr == `INSERT INTO accounts( "name", cpf, ballance, created_at) VALUES($1, $2, $3, $4) RETURNING id;`
+				})).Return([]interface{}{}, errors.New("error"))
+			case "error for duplicated CPF":
+				a.DB.(*mocks.SQLInterface).On("QueryExecutor", mock.MatchedBy(func(conn database.QueryConfig) bool {
+					return conn.QueryStr == `INSERT INTO accounts( "name", cpf, ballance, created_at) VALUES($1, $2, $3, $4) RETURNING id;`
+				})).Return([]interface{}{}, nil)
+			}
+
+			if err := a.CreateAccount(tt.args.account); (err != nil) != tt.wantErr {
+				t.Errorf("Service.CreateAccount() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
