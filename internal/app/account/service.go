@@ -7,22 +7,24 @@ import (
 	"github.com/julioshinoda/transfer-api/pkg/database"
 )
 
-//AccountsInterface interface that contains account methods
+//Accounter interface that contains account methods
 type Accounter interface {
 	GetAccounts() []models.Accounts
+	GetBallanceByAccountsID(accountID int64) (float64, error)
 }
 
-type AccountService struct {
+//Service struct that implements Accounter interface
+type Service struct {
 	DB database.SQLInterface
 }
 
 //NewAccountService return Accounter interface
-func NewAccountService(account AccountService) Accounter {
+func NewAccountService(account Service) Accounter {
 	return account
 }
 
 //GetAccounts list all accounts
-func (a AccountService) GetAccounts() []models.Accounts {
+func (a Service) GetAccounts() []models.Accounts {
 	query := "select id, name, cpf, ballance, created_at from accounts"
 	result, err := a.DB.QueryExecutor(database.QueryConfig{QueryStr: query,
 		Values: []interface{}{}})
@@ -47,4 +49,23 @@ func (a AccountService) GetAccounts() []models.Accounts {
 	}
 
 	return []models.Accounts{}
+}
+
+//GetBallanceByAccountsID returns ballance from an account by a given account ID
+func (a Service) GetBallanceByAccountsID(accountID int64) (float64, error) {
+	query := "select  ballance from accounts where id = $1"
+	result, err := a.DB.QueryExecutor(database.QueryConfig{QueryStr: query,
+		Values: []interface{}{accountID}})
+
+	if err != nil {
+		return 0, err
+	}
+
+	if len(result) > 0 {
+		account := result[0]
+		return float64(account.([]interface{})[0].(int32)) / 100, nil
+	}
+
+	return 0, nil
+
 }

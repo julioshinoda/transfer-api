@@ -7,7 +7,6 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-
 	"github.com/julioshinoda/transfer-api/internal/app/account"
 )
 
@@ -28,6 +27,7 @@ func router() http.Handler {
 
 	r.Group(func(r chi.Router) {
 		r.Get("/accounts", account.GetAccounts)
+		r.Get("/accounts/{account_id}/balance", account.GetBallance)
 
 	})
 	return r
