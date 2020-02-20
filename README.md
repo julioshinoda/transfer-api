@@ -12,7 +12,7 @@ Em seguida, em outro terminal rode o comando abaixo
 
 `make migration`
 
-Agora que a API está rodando e o banco ja esta com as tabelas criadas pela migration, pode ser usado qualquer dos enpoints abaixo
+Agora que a API está rodando e o banco ja esta com as tabelas criadas pela migration. Pode ser usado qualquer um dos enpoints abaixo
 
 ### obtém a lista de contas
 
