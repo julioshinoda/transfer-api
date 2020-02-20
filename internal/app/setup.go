@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/julioshinoda/transfer-api/internal/app/account"
+	"github.com/julioshinoda/transfer-api/internal/app/transfer"
 )
 
 //Setup function that start server with all setups
@@ -25,9 +26,14 @@ func router() http.Handler {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Group(func(r chi.Router) {
+		//Accounts routes
 		r.Get("/accounts", account.GetAccounts)
 		r.Get("/accounts/{account_id}/balance", account.GetBallance)
 		r.Post("/accounts", account.CreateAccount)
+
+		//Transfers routes
+
+		r.Get("/transfers", transfer.GetTransfers)
 
 	})
 	return r
