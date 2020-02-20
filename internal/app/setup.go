@@ -1,5 +1,9 @@
 package app
 
+/*
+	Here is set application setup like middlewares and routes.
+*/
+
 import (
 	"fmt"
 	"net/http"

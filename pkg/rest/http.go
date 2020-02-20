@@ -1,5 +1,8 @@
 package rest
 
+/*
+	This is a helper to parse response to content-type json
+*/
 import (
 	"encoding/json"
 	"net/http"

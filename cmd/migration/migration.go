@@ -1,5 +1,9 @@
 package main
 
+/*
+	This is the entrypoint to run migration using file inside db/migration
+*/
+
 import (
 	"fmt"
 	"os"

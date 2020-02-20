@@ -17,7 +17,7 @@ func GetTransfers(w http.ResponseWriter, r *http.Request) {
 		rest.RespondwithJSON(w, 500, map[string]string{"message": err.Error()})
 		return
 	}
-	rest.RespondwithJSON(w, 500, transfersList)
+	rest.RespondwithJSON(w, 200, transfersList)
 }
 
 //CreateTransfer handler to transfer money service

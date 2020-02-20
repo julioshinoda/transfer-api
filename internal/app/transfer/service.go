@@ -48,7 +48,7 @@ func (t Service) GetTransfers() ([]models.Transfers, error) {
 		}
 		return transfersList, nil
 	}
-	return nil, nil
+	return []models.Transfers{}, nil
 }
 
 //TransferMoney service to apply all transfer rules and transfer money between accounts
