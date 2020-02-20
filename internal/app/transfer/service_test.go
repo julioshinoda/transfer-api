@@ -7,10 +7,9 @@ import (
 	"time"
 
 	"github.com/julioshinoda/transfer-api/mocks"
-	"github.com/stretchr/testify/mock"
-
 	"github.com/julioshinoda/transfer-api/models"
 	"github.com/julioshinoda/transfer-api/pkg/database"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestService_GetTransfers(t *testing.T) {
@@ -81,6 +80,85 @@ func TestService_GetTransfers(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Service.GetTransfers() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestService_TransferMoney(t *testing.T) {
+	type fields struct {
+		DB database.SQLInterface
+	}
+	type args struct {
+		origin      int64
+		destination int64
+		value       int
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "success to transfer money",
+			fields: fields{
+				DB: &mocks.SQLInterface{},
+			},
+			args: args{
+				origin:      int64(1),
+				destination: int64(2),
+				value:       1200,
+			},
+		},
+		{
+			name: "error on query origin accounts balance",
+			fields: fields{
+				DB: &mocks.SQLInterface{},
+			},
+			args: args{
+				origin:      int64(1),
+				destination: int64(2),
+				value:       10000,
+			},
+			wantErr: true,
+		},
+		{
+			name: "insufficient balance",
+			fields: fields{
+				DB: &mocks.SQLInterface{},
+			},
+			args: args{
+				origin:      int64(1),
+				destination: int64(2),
+				value:       10000,
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			transfer := Service{
+				DB: tt.fields.DB,
+			}
+			switch tt.name {
+			case "success to transfer money":
+				transfer.DB.(*mocks.SQLInterface).On("QueryExecutor", mock.MatchedBy(func(conn database.QueryConfig) bool {
+					return conn.QueryStr == "select ballance from accounts where id = $1 and ballance >= $2"
+				})).Return([]interface{}{[]interface{}{int32(15000)}}, nil)
+				transfer.DB.(*mocks.SQLInterface).On("TransactionExecutor", mock.Anything).Return(nil)
+			case "insufficient balance":
+				transfer.DB.(*mocks.SQLInterface).On("QueryExecutor", mock.MatchedBy(func(conn database.QueryConfig) bool {
+					return conn.QueryStr == "select ballance from accounts where id = $1 and ballance >= $2"
+				})).Return([]interface{}{}, nil)
+			case "error on query origin accounts balance":
+				transfer.DB.(*mocks.SQLInterface).On("QueryExecutor", mock.MatchedBy(func(conn database.QueryConfig) bool {
+					return conn.QueryStr == "select ballance from accounts where id = $1 and ballance >= $2"
+				})).Return(nil, errors.New("error"))
+			}
+
+			if err := transfer.TransferMoney(tt.args.origin, tt.args.destination, tt.args.value); (err != nil) != tt.wantErr {
+				t.Errorf("Service.TransferMoney() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

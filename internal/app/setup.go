@@ -34,7 +34,7 @@ func router() http.Handler {
 		//Transfers routes
 
 		r.Get("/transfers", transfer.GetTransfers)
-
+		r.Post("/transfers", transfer.CreateTransfer)
 	})
 	return r
 }

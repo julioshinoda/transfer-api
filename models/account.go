@@ -19,15 +19,15 @@ type Accounts struct {
 func (a *Accounts) Bind(r *http.Request) error {
 
 	if a.Name == "" {
-		return errors.New("missing field name.")
+		return errors.New("missing field name")
 	}
 
 	if a.CPF == "" {
-		return errors.New("missing field CPF.")
+		return errors.New("missing field CPF")
 	}
 
 	if a.Ballance == 0 {
-		return errors.New("missing field ballance.")
+		a.Ballance = 10000
 	}
 
 	return nil
